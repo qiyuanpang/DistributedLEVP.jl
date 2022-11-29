@@ -1,4 +1,4 @@
-# DistributedEigenpairs.jl
+# DistributedLEVP.jl
 Distributed solvers for evaluating smallest eigenpairs of large sparse symmetric matrices.
 
 
