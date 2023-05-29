@@ -15,7 +15,7 @@ Clustering via Power Methods: pm.jl
 
 Papers:
 
-[Qiyuan Pang and Haizhao Yang, Spectral Clustering via Orthogonalization-Free Methods, arXiv:2305.10356](https://arxiv.org/abs/2305.10356)
+[Qiyuan Pang and Haizhao Yang, Spectral Clustering via Orthogonalization-Free Methods, arXiv:2305.10356, May 2023](https://arxiv.org/abs/2305.10356)
 
 
-[Qiyuan Pang and Haizhao Yang, A Distributed Block Chebyshev-Davidson Algorithm for Parallel Spectral Clustering, arXiv:2212.04443](https://arxiv.org/abs/2212.04443)
+[Qiyuan Pang and Haizhao Yang, A Distributed Block Chebyshev-Davidson Algorithm for Parallel Spectral Clustering, arXiv:2212.04443, December 2022](https://arxiv.org/abs/2212.04443)
