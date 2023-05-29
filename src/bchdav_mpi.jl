@@ -966,7 +966,13 @@ function SpMM_A_1(X, A, info_cols_dist, rank_row, rank_col, comm_size_sq, root, 
     end
 
     cputime["mul!"] = @elapsed begin
-    mul!(Y_gather, A, X_gather')
+    # mul!(Y_gather, A, X_gather')
+    
+    # X_gather_T = zeros(size(X_gather, 2), size(X_gather, 1))
+    # transpose!(X_gather_T, X_gather)
+    # mul!(Y_gather, A, X_gather_T)
+
+    mul!(Y_gather, A, transpose(X_gather))
     end
 
     # cputime["Reduce!"] = @elapsed begin
@@ -1127,6 +1133,15 @@ function SpMM_A_1_w_E(X, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq,
     Y
 end
 
+function SpMM_A_1_w_E_time(X, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
+    Z, cputime = SpMM_A_1(X, A, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
+    Y, cputime2 = SpMM_A_1(Z, E', info_cols_dist, rank_col, rank_row, comm_size_sq, root, comm_col, comm_row)
+    for (key, val) in cputime
+        cputime[key] += cputime2[key]
+    end
+    Y, cputime
+end
+
 # function Cheb_filter_scal(deg, low, high, leftb, X, A, E, X_gather, X_gather_T, X_gather_vbuf, Y_gather, Y_gather_T, Y_gather_T_vbuf, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
 function Cheb_filter_scal(deg, low, high, leftb, X, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
 # deg should always be an odd number
@@ -1209,32 +1224,41 @@ function Cheb_filter_scal_1(deg, low, high, leftb, X, A, E, info_cols_dist, rank
     Y = SpMM_A_1_w_E(X, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
     end
     cputime["local_computation"] = @elapsed begin
-    Y = (Y - center*X)*(sigma/e)
+    # Y = (Y - center*X)*(sigma/e)
+    mul!(Y, center, X, -1.0, 1.0)
+    lmul!(sigma/e, Y)
     end
+    Y1 = zeros(size(Y))
     for kk = 2:deg-1
         sigma_new = 1 /(tau - sigma)
 
         cputime["SpMM"] += @elapsed begin
-        Y1 = SpMM_A_1_w_E(Y, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
+        Y1 .= SpMM_A_1_w_E(Y, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
         end
         
         cputime["local_computation"] += @elapsed begin
-        Y1 = (Y1 - center*Y)*(2*sigma_new/e) - (sigma*sigma_new)*X
+        # Y1 = (Y1 - center*Y)*(2*sigma_new/e) - (sigma*sigma_new)*X
+        mul!(Y1, center, Y, -1.0, 1.0)
+        lmul!(2*sigma_new/e, Y1)
+        mul!(Y1, sigma*sigma_new, X, -1.0, 1.0)
         end
 
         cputime["copy"] += @elapsed begin
-        X = deepcopy(Y)
-        Y = deepcopy(Y1)
+        X .= Y
+        Y .= Y1
         end
         sigma = sigma_new
     end
     
     cputime["SpMM"] += @elapsed begin
-    Y1 = SpMM_A_1_w_E(Y, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
+    Y1 .= SpMM_A_1_w_E(Y, A, E, info_cols_dist, rank_row, rank_col, comm_size_sq, root, comm_row, comm_col)
     end
     sigma_new = 1 /(tau - sigma)
     cputime["local_computation"] += @elapsed begin
-    Y1 = (Y1 - center*Y)*(2*sigma_new/e) - (sigma*sigma_new)*X
+    # Y1 = (Y1 - center*Y)*(2*sigma_new/e) - (sigma*sigma_new)*X
+    mul!(Y1, center, Y, -1.0, 1.0)
+    lmul!(2*sigma_new/e, Y1)
+    mul!(Y1, sigma*sigma_new, X, -1.0, 1.0)
     end
     
     Y1, cputime

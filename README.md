@@ -1,22 +1,21 @@
 # DistributedLEVP.jl
-Distributed solvers for evaluating smallest eigenpairs of large sparse symmetric matrices, one of the typical usage of this package is for dimensionality reduction in spectral clustering.
+Scalable parallel solvers for evaluating smallest eigenpairs of large sparse symmetric matrices, one of the main usages of this package is for dimensionality reduction in spectral clustering.
 
-March 2023 update:
+Available methods:
 
-Parallel Graph Signal Filter: gsf_mpi.jl
+Orthogonalization-free methods: gd_mp.jl (for multithreading), gd_hybrid.jl (for multiprocessing and multithreading)
 
-Parallel orthogonalization-free methods: gd_mpi.jl
+Block Chebyshev-Davidson method: bchdav_mpi.jl (multiprocessing) 
+
+Graph Signal Filter: gsf.jl
 
 Power Iteration Clustering: pic_sq.jl
 
-Numerical results show that, as a dimentionality reduction method on the synthetic graph datasets from MIT Graph Challenge (http://graphchallenge.mit.edu/data-sets), the orthogonalization-free methods significantly outperform existing methods including ARPACK, LOBPCG, Graph Signal Filter, and Powering Iteration Clustering. The paper will be ready soon.
+Clustering via Power Methods: pm.jl
 
-December 2022 update:
+Papers:
 
-Distributed Block Chebyshev-Davidson method: bchdav_mpi.jl
+[Qiyuan Pang and Haizhao Yang, Spectral Clustering via Orthogonalization-Free Methods, arXiv:2305.10356](https://arxiv.org/abs/2305.10356)
 
-For usages, please refer to ./src/bchdav_mpi.jl and the test file ./test/testBchdav_Graph.jl.
 
-![My Image](./scaling_bchdav.png)
-
-The scaling of the method and its component is summarized in the plot above. The matrix tested above is the normalized Laplacian of a static graph of 2*10^7 nodes in the high block overlap low block size variation category in http://graphchallenge.mit.edu/data-sets. 
+[Qiyuan Pang and Haizhao Yang, A Distributed Block Chebyshev-Davidson Algorithm for Parallel Spectral Clustering, arXiv:2212.04443](https://arxiv.org/abs/2212.04443)
